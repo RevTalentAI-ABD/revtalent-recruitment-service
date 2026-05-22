@@ -15,6 +15,12 @@ import java.util.Map;
 @RequestMapping("/api/candidates")
 @RequiredArgsConstructor
 public class CandidateController {
+    private final org.springframework.core.env.Environment env;
+
+    @GetMapping("/env")
+    public ResponseEntity<String> getEnv() {
+        return ResponseEntity.ok(env.getProperty("spring.data.mongodb.uri") + " | " + env.getProperty("spring.mongodb.uri"));
+    }
 
     private final CandidateService candidateService;
 

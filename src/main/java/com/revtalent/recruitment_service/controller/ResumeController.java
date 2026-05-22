@@ -12,7 +12,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/resume")
 @RequiredArgsConstructor
-@CrossOrigin("*")
+
 public class ResumeController {
 
     private final ResumeService resumeService;

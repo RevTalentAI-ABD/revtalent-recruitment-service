@@ -26,10 +26,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/recruitment", "/api/recruitment/**").permitAll()
-                        .requestMatchers("/api/candidates", "/api/candidates/**").permitAll()
-                        .requestMatchers("/api/candidate", "/api/candidate/**").permitAll()
-                        .requestMatchers("/api/resume", "/api/resume/**").permitAll()
+                        .requestMatchers("/api/recruitment/jobs", "/api/candidates", "/api/resume/upload").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
@@ -41,3 +38,4 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 }
+
