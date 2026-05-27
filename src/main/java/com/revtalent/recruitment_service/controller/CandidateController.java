@@ -14,18 +14,15 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/candidates")
 @RequiredArgsConstructor
+@org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
 public class CandidateController {
-    private final org.springframework.core.env.Environment env;
 
-    @GetMapping("/env")
-    public ResponseEntity<String> getEnv() {
-        return ResponseEntity.ok(env.getProperty("spring.data.mongodb.uri") + " | " + env.getProperty("spring.mongodb.uri"));
-    }
 
     private final CandidateService candidateService;
 
-    // ── Add candidate to a job ────────────────────────────────────────────────
+    // ── Add candidate to a job (public job board apply) ─────────────────────────
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("permitAll()")
     public ResponseEntity<CandidateResponse> addCandidate(@RequestBody CandidateRequest req) {
         return ResponseEntity.ok(candidateService.addCandidate(req));
     }
@@ -76,10 +73,20 @@ public class CandidateController {
 
         Long interviewerId = null;
         Object rawId = body.get("interviewerId");
-        if (rawId instanceof Number) {
-            interviewerId = ((Number) rawId).longValue();
-        } else if (rawId instanceof String && !((String) rawId).isBlank()) {
-            try { interviewerId = Long.parseLong((String) rawId); } catch (NumberFormatException ignored) {}
+        if (rawId != null) {
+            if (rawId instanceof Number) {
+                interviewerId = ((Number) rawId).longValue();
+            } else if (rawId instanceof String && !((String) rawId).isBlank()) {
+                try {
+                    interviewerId = Long.parseLong((String) rawId);
+                } catch (NumberFormatException e) {
+                    return ResponseEntity.badRequest().build();
+                }
+            } else {
+                return ResponseEntity.badRequest().build();
+            }
+        } else {
+            return ResponseEntity.badRequest().build();
         }
 
         return ResponseEntity.ok(candidateService.scheduleInterview(id, interviewDate, interviewerId));

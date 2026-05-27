@@ -62,7 +62,7 @@ public class CandidateService {
         boolean exists = candidateRepository
                 .findByEmail(req.getEmail())
                 .stream()
-                .anyMatch(c -> c.getJobPosting().getId().equals(req.getJobId()));
+                .anyMatch(c -> c.getJobPosting() != null && c.getJobPosting().getId().equals(req.getJobId()));
 
         if (exists) {
             throw new IllegalArgumentException("Candidate with this email already applied to this job.");

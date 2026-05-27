@@ -16,12 +16,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/recruitment")
 @RequiredArgsConstructor
+@org.springframework.security.access.prepost.PreAuthorize("hasRole('HR_ADMIN')")
 public class RecruitmentController {
 
     private final RecruitmentService service;
     private final JobPostingRepository jobPostingRepository;
 
     @GetMapping("/jobs")
+    @org.springframework.security.access.prepost.PreAuthorize("permitAll()")
     public ResponseEntity<List<JobPostingResponse>> jobs() {
         return ResponseEntity.ok(service.getAllJobs());
     }
@@ -41,7 +43,11 @@ public class RecruitmentController {
         JobPosting job = jobPostingRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        job.setStatus(JobPosting.Status.valueOf(status));
+        try {
+            job.setStatus(JobPosting.Status.valueOf(status.toUpperCase()));
+        } catch (IllegalArgumentException | NullPointerException e) {
+            return ResponseEntity.badRequest().body("Invalid status");
+        }
 
         jobPostingRepository.save(job);
 

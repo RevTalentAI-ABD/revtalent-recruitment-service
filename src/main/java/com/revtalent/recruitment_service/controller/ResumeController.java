@@ -12,12 +12,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/resume")
 @RequiredArgsConstructor
-
+@org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
 public class ResumeController {
 
     private final ResumeService resumeService;
 
     @PostMapping("/upload")
+    @org.springframework.security.access.prepost.PreAuthorize("permitAll()")
     public ResponseEntity<Map<String, Object>> uploadAndLink(
             @RequestParam("file") MultipartFile file,
             @RequestParam("candidateId") Long candidateId) {
@@ -40,6 +41,7 @@ public class ResumeController {
         return ResponseEntity.ok(resumeService.getResumeByCandidate(candidateId));
     }
     @GetMapping("/candidate/{candidateId}/download")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('HR_ADMIN')")
     public ResponseEntity<byte[]> downloadResume(
             @PathVariable Long candidateId) {
 

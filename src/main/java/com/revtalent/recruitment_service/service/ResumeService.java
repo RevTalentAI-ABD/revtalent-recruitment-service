@@ -18,6 +18,7 @@ public class ResumeService {
 
     private final ResumeRepository resumeRepository;
     private final CandidateRepository candidateRepository;
+    private final com.revtalent.recruitment_service.feign.AiServiceClient aiServiceClient;
 
     // ── record for download response ──────────────────────────────────────────
     public record ResumeFile(byte[] data, String contentType, String filename) {}
@@ -58,8 +59,22 @@ public class ResumeService {
         Map<String, Object> result = new HashMap<>();
         result.put("filename", file.getOriginalFilename());
         result.put("size", file.getSize());
-        result.put("status", "analyzed");
-        // TODO: add AI scoring here
+        
+        try {
+            String text = extractText(file);
+            Map<String, String> requestBody = new HashMap<>();
+            requestBody.put("resumeText", text);
+            requestBody.put("jobDescription", "General assessment of candidate skills and qualifications.");
+            
+            Map<String, Object> aiResponse = aiServiceClient.screenResume(requestBody);
+            
+            result.put("status", "analyzed");
+            result.put("aiSummary", aiResponse.get("response"));
+        } catch (Exception e) {
+            result.put("status", "error");
+            result.put("error", e.getMessage());
+        }
+        
         return result;
     }
 
@@ -114,11 +129,22 @@ public class ResumeService {
     // ── Basic text extraction helper ──────────────────────────────────────────
     private String extractText(MultipartFile file) {
         try {
-            // Simple: just read bytes as string for now
-            // TODO: use Apache Tika or PDFBox for proper extraction
-            return new String(file.getBytes());
-        } catch (IOException e) {
-            return "";
+            byte[] bytes = file.getBytes();
+            if (bytes.length > 5 * 1024 * 1024) { // 5MB limit
+                return "File too large for extraction";
+            }
+            
+            String filename = file.getOriginalFilename();
+            if (filename != null && filename.toLowerCase().endsWith(".pdf")) {
+                try (org.apache.pdfbox.pdmodel.PDDocument document = org.apache.pdfbox.Loader.loadPDF(bytes)) {
+                    org.apache.pdfbox.text.PDFTextStripper stripper = new org.apache.pdfbox.text.PDFTextStripper();
+                    return stripper.getText(document);
+                }
+            }
+            
+            return new String(bytes, java.nio.charset.StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            return "Extraction error";
         }
     }
 }

@@ -26,9 +26,17 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/recruitment/jobs", "/api/candidates", "/api/resume/upload").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/recruitment/jobs").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/candidates").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/resume/upload").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/candidates/register").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/auth/login").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.POST, "/api/recruitment/jobs/apply").permitAll()
                         .anyRequest().authenticated()
                 )
+                .exceptionHandling(e -> e.authenticationEntryPoint(
+                        (req, res, ex) -> res.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+                ))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
