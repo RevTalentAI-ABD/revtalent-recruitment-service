@@ -12,7 +12,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/candidate")
 @RequiredArgsConstructor
-@org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
 public class CandidateDashboardController {
 
     private final CandidateDashboardService dashboardService;

@@ -3,7 +3,7 @@ package com.revtalent.recruitment_service.service;
 import com.revtalent.recruitment_service.model.Candidate;
 import com.revtalent.recruitment_service.model.Users;
 import com.revtalent.recruitment_service.repository.CandidateRepository;
-import com.revtalent.recruitment_service.util.SecurityUserContext;
+import com.revtalent.recruitment_service.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,12 +16,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CandidateDashboardService {
 
-    private final SecurityUserContext securityUserContext;
+    private final UserRepository userRepository;
     private final CandidateRepository candidateRepository;
 
     @Transactional(readOnly = true)
-    public Map<String, Object> getProfile(String principal) {
-        Users users = securityUserContext.resolveCurrentUser(principal);
+    public Map<String, Object> getProfile(String username) {
+        Users users = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
         return Map.of(
                 "id",        users.getId(),
@@ -35,8 +36,9 @@ public class CandidateDashboardService {
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> getApplications(String principal) {
-        Users users = securityUserContext.resolveCurrentUser(principal);
+    public List<Map<String, Object>> getApplications(String username) {
+        Users users = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
         return candidateRepository.findByEmail(users.getEmail())
                 .stream().map(c -> {
@@ -56,8 +58,9 @@ public class CandidateDashboardService {
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> getUpcomingInterviews(String principal) {
-        Users users = securityUserContext.resolveCurrentUser(principal);
+    public List<Map<String, Object>> getUpcomingInterviews(String username) {
+        Users users = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
 
         return candidateRepository.findByEmail(users.getEmail())
                 .stream()

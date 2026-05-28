@@ -10,7 +10,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/screening")
 @RequiredArgsConstructor
-@org.springframework.security.access.prepost.PreAuthorize("hasRole('HR_ADMIN')")
 public class ScreeningController {
 
     private final ResumeScreeningService screeningService;

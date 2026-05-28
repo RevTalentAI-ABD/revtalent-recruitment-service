@@ -45,8 +45,7 @@ public class ResumeScreeningService {
             requestBody.put("jobDescription", jobDescription);
             
             Map<String, Object> response = aiServiceClient.screenResume(requestBody);
-            Object aiResponse = response != null ? response.get("response") : null;
-            return aiResponse != null ? aiResponse.toString() : "SCORE: 0\nNo response from AI service";
+            return response.get("response").toString();
         } catch (Exception e) {
             e.printStackTrace();
             return "SCORE: 0\nError calling AI Service: " + e.getMessage();
@@ -118,19 +117,12 @@ public class ResumeScreeningService {
         String resumeText = resume.getParsedText().toLowerCase();
         String reqText = job.getRequirements().toLowerCase();
 
-        List<String> keywords = java.util.Arrays.stream(reqText.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(java.util.stream.Collectors.toList());
-
-        if (keywords.isEmpty()) {
-            return 0.0;
-        }
+        List<String> keywords = Arrays.asList(reqText.split(","));
 
         int matchCount = 0;
 
         for (String keyword : keywords) {
-            if (resumeText.contains(keyword)) {
+            if (resumeText.contains(keyword.trim())) {
                 matchCount++;
             }
         }

@@ -36,20 +36,15 @@ public class JwtFilter extends OncePerRequestFilter {
                 String role = jwtUtil.extractRole(token);
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    java.util.List<SimpleGrantedAuthority> authorities = role != null 
-                        ? List.of(new SimpleGrantedAuthority("ROLE_" + role)) 
-                        : List.of();
                     UsernamePasswordAuthenticationToken auth =
                             new UsernamePasswordAuthenticationToken(
                                     username,
                                     null,
-                                    authorities
+                                    List.of(new SimpleGrantedAuthority("ROLE_" + role))
                             );
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 }
-            } catch (Exception e) {
-                SecurityContextHolder.clearContext();
-            }
+            } catch (Exception e) { response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); response.getWriter().write("Invalid or expired token"); return; }
         }
 
         filterChain.doFilter(request, response);
