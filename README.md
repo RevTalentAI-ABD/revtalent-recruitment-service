@@ -4,7 +4,7 @@ The **Recruitment Service** handles candidate job applications, resume storage, 
 
 ---
 
-## 🔄 Recruitment & Screening Workflow
+##  Recruitment & Screening Workflow
 
 The service integrates standard keyword matching with advanced asynchronous AI scoring:
 
@@ -58,7 +58,7 @@ The system calculates candidate fit in two ways:
 
 ---
 
-## 🛠️ Dependencies Added
+##  Dependencies Added
 
 The following packages are declared in this service's `pom.xml`:
 
